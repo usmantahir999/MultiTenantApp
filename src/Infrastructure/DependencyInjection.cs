@@ -1,4 +1,5 @@
 ﻿using Finbuckle.MultiTenant;
+using Infrastructure.Contexts;
 using Infrastructure.Tenancy;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +18,11 @@ namespace Infrastructure
             }).AddMultiTenant<SchoolTenantInfo>()
               .WithHeaderStrategy(TenancyConstants.TenantIdName)
               .WithClaimStrategy(TenancyConstants.TenantIdName)
-              .Services;
+              .Services
+              .AddDbContext<ApplicationDbContext>(options =>
+              {
+                  options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+              });
         }
 
         public static IApplicationBuilder UseInfrastructure(this IApplicationBuilder app)
