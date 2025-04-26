@@ -14,15 +14,13 @@ namespace Infrastructure.Contexts
 {
     public class ApplicationDbSeeder
     {
-        private readonly IMultiTenantContextAccessor<SchoolTenantInfo> _multiTenantContextAccessor;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _applicationdDbContext;
         private readonly IMultiTenantContextAccessor<SchoolTenantInfo> _tenantInfoContextAccessor;
-        public ApplicationDbSeeder(IMultiTenantContextAccessor<SchoolTenantInfo> multiTenantContextAccessor, RoleManager<ApplicationRole> roleManager,
+        public ApplicationDbSeeder(RoleManager<ApplicationRole> roleManager,
             UserManager<ApplicationUser> userManager, ApplicationDbContext applicationdDbContext, IMultiTenantContextAccessor<SchoolTenantInfo> tenantInfoContextAccessor)
         {
-            _multiTenantContextAccessor = multiTenantContextAccessor;
             _roleManager = roleManager;
             _userManager = userManager;
             _applicationdDbContext = applicationdDbContext;
@@ -40,8 +38,8 @@ namespace Infrastructure.Contexts
                 //seeding the data.
                 if(await _applicationdDbContext.Database.CanConnectAsync(cancellationToken))
                 {
-                    //await SeedRolesAsync(cancellationToken);
-                    //await SeedUsersAsync(cancellationToken);
+                    await InitializeDefaultRolesAsync(cancellationToken);
+                    await InitializeAdminUserAsync();
                 }
             }
         }
@@ -101,6 +99,40 @@ namespace Infrastructure.Contexts
 
                     await _applicationdDbContext.SaveChangesAsync(ct);
                 }
+            }
+        }
+
+
+        private async Task InitializeAdminUserAsync()
+        {
+            if (string.IsNullOrEmpty(_tenantInfoContextAccessor.MultiTenantContext.TenantInfo.Email)) return;
+
+            if (await _userManager.Users
+                .SingleOrDefaultAsync(user => user.Email == _tenantInfoContextAccessor.MultiTenantContext.TenantInfo.Email)
+                is not ApplicationUser incomingUser)
+            {
+                incomingUser = new ApplicationUser
+                {
+                    FirstName = _tenantInfoContextAccessor.MultiTenantContext.TenantInfo.FirstName,
+                    LastName = _tenantInfoContextAccessor.MultiTenantContext.TenantInfo.LastName,
+                    Email = _tenantInfoContextAccessor.MultiTenantContext.TenantInfo.Email,
+                    UserName = _tenantInfoContextAccessor.MultiTenantContext.TenantInfo.Email,
+                    EmailConfirmed = true,
+                    PhoneNumberConfirmed = true,
+                    NormalizedEmail = _tenantInfoContextAccessor.MultiTenantContext.TenantInfo.Email.ToUpperInvariant(),
+                    NormalizedUserName = _tenantInfoContextAccessor.MultiTenantContext.TenantInfo.Email.ToUpperInvariant(),
+                    IsActive = true,
+                };
+
+                var passwordHash = new PasswordHasher<ApplicationUser>();
+
+                incomingUser.PasswordHash = passwordHash.HashPassword(incomingUser, TenancyConstants.DefaultPassword);
+                await _userManager.CreateAsync(incomingUser);
+            }
+
+            if (!await _userManager.IsInRoleAsync(incomingUser, RoleConstants.Admin))
+            {
+                await _userManager.AddToRoleAsync(incomingUser, RoleConstants.Admin);
             }
         }
     }
