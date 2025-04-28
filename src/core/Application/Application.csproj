@@ -10,4 +10,15 @@
     <ProjectReference Include="..\Domain\Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Identity\Roles\Commands\" />
+    <Folder Include="Features\Identity\Roles\Queries\" />
+    <Folder Include="Features\Identity\Tokens\Queries\" />
+    <Folder Include="Features\Identity\Users\Commands\" />
+    <Folder Include="Features\Identity\Users\Queries\" />
+    <Folder Include="Features\Schools\" />
+    <Folder Include="Features\Tenancy\" />
+    <Folder Include="Pipelines\" />
+  </ItemGroup>
+
 </Project>
