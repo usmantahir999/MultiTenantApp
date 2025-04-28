@@ -1,6 +1,6 @@
 ﻿using Finbuckle.MultiTenant.Abstractions;
 using Infrastructure.Constants;
-using Infrastructure.Identity;
+using Infrastructure.Identity.Models;
 using Infrastructure.Tenancy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

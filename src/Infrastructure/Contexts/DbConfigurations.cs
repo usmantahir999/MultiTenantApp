@@ -1,6 +1,6 @@
 ﻿using Domain.Entities;
 using Finbuckle.MultiTenant;
-using Infrastructure.Identity;
+using Infrastructure.Identity.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
