@@ -1,9 +1,15 @@
 ﻿using Application.Exceptions;
 using Application.Features.Identity.Tokens;
 using Finbuckle.MultiTenant.Abstractions;
+using Infrastructure.Constants;
 using Infrastructure.Identity.Models;
 using Infrastructure.Tenancy;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Infrastructure.Identity.Tokens
 {
@@ -18,12 +24,12 @@ namespace Infrastructure.Identity.Tokens
         }
         public async Task<TokenResponse> LoginAsync(TokenRequest request)
         {
-            //Validation
-            if (!_tenantContextAccessor.MultiTenantContext.TenantInfo?.IsActive??false)
+            #region Validations
+            if (!_tenantContextAccessor.MultiTenantContext.TenantInfo?.IsActive ?? false)
             {
                 throw new UnAuthorizedException(["Tenant is not active. Contact Administrator."]);
             }
-            var userInDb = await _userManager.FindByNameAsync(request.Username)?? throw new UnAuthorizedException(["Authentication is not successful."]);
+            var userInDb = await _userManager.FindByNameAsync(request.Username) ?? throw new UnAuthorizedException(["Authentication is not successful."]);
             if (!await _userManager.CheckPasswordAsync(userInDb, request.Password))
             {
                 throw new UnAuthorizedException(["Incorrect Username or password."]);
@@ -39,12 +45,77 @@ namespace Infrastructure.Identity.Tokens
                     throw new UnAuthorizedException(["Tenant Subscription has expired. Contact Administrator."]);
                 }
             }
-            return null!;
+            #endregion
+
+            return await GenerateTokenAndUpdateUserAsync(userInDb);
         }
 
         public Task<TokenResponse> RefreshTokenAsync(RefreshTokenRequest request)
         {
             throw new NotImplementedException();
+        }
+
+        private async Task<TokenResponse> GenerateTokenAndUpdateUserAsync(ApplicationUser user)
+        {
+            //Generate Jwt
+            var newJwt = GenerateToken(user);
+            //Refresh Token
+            user.RefreshToken = GenerateRefreshToken();
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(1);
+            await _userManager.UpdateAsync(user);
+            return new TokenResponse
+            {
+                Jwt = newJwt,
+                RefreshToken = user.RefreshToken,
+                RefreshTokenExpiryDate = user.RefreshTokenExpiryTime
+            };
+
+        }
+
+        private string GenerateToken(ApplicationUser user)
+        {
+            //encrypted token
+
+            return GenerateEncryptedToken(GenerateSigningCredentials(), GetUserClaims(user));
+        }
+        private SigningCredentials GenerateSigningCredentials()
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("YourSecretKeyHere"));
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            return credentials;
+        }
+        private IEnumerable<Claim> GetUserClaims(ApplicationUser user)
+        {
+            var claims = new List<Claim>
+            {
+                new (ClaimTypes.NameIdentifier, user.Id),
+                new (ClaimTypes.Email, user.Email!),
+                new (ClaimTypes.Name, user.FirstName),
+                new (ClaimTypes.Surname, user.LastName),
+                new (ClaimTypes.MobilePhone, user.PhoneNumber??string.Empty),
+                new Claim(ClaimConstants.Tenant, _tenantContextAccessor.MultiTenantContext.TenantInfo!.Id!)
+            };
+            return claims;
+        }
+        private string GenerateEncryptedToken(SigningCredentials signingCredentials, IEnumerable<Claim> claims)
+        {
+            var token = new JwtSecurityToken(
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(60),
+                signingCredentials: signingCredentials
+            );
+            var tokenHandler = new JwtSecurityTokenHandler();
+            return tokenHandler.WriteToken(token);
+        }
+
+        private string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[32];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomNumber);
+                return Convert.ToBase64String(randomNumber);
+            }
         }
     }
 }
