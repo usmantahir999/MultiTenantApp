@@ -10,6 +10,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Infrastructure.Identity.Tokens
 {
@@ -17,10 +18,13 @@ namespace Infrastructure.Identity.Tokens
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMultiTenantContextAccessor<SchoolTenantInfo> _tenantContextAccessor;
-        public TokenService(UserManager<ApplicationUser> userManager, IMultiTenantContextAccessor<SchoolTenantInfo> tenantContextAccessor)
+        private readonly RoleManager<ApplicationRole> _roleManager;
+
+        public TokenService(UserManager<ApplicationUser> userManager, IMultiTenantContextAccessor<SchoolTenantInfo> tenantContextAccessor, RoleManager<ApplicationRole> roleManager)
         {
             _userManager = userManager;
             _tenantContextAccessor = tenantContextAccessor;
+            _roleManager = roleManager;
         }
         public async Task<TokenResponse> LoginAsync(TokenRequest request)
         {
@@ -58,7 +62,7 @@ namespace Infrastructure.Identity.Tokens
         private async Task<TokenResponse> GenerateTokenAndUpdateUserAsync(ApplicationUser user)
         {
             //Generate Jwt
-            var newJwt = GenerateToken(user);
+            var newJwt = await GenerateToken(user);
             //Refresh Token
             user.RefreshToken = GenerateRefreshToken();
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(1);
@@ -72,11 +76,11 @@ namespace Infrastructure.Identity.Tokens
 
         }
 
-        private string GenerateToken(ApplicationUser user)
+        private async Task<string> GenerateToken(ApplicationUser user)
         {
             //encrypted token
 
-            return GenerateEncryptedToken(GenerateSigningCredentials(), GetUserClaims(user));
+            return GenerateEncryptedToken(GenerateSigningCredentials(), await GetUserClaims(user));
         }
         private SigningCredentials GenerateSigningCredentials()
         {
@@ -84,8 +88,21 @@ namespace Infrastructure.Identity.Tokens
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             return credentials;
         }
-        private IEnumerable<Claim> GetUserClaims(ApplicationUser user)
+        private async Task<IEnumerable<Claim>> GetUserClaims(ApplicationUser user)
         {
+            var userClaims = await _userManager.GetClaimsAsync(user);
+            var userRoles = await _userManager.GetRolesAsync(user);
+            var roleClaims = new List<Claim>();
+            var permissionClaims = new List<Claim>();
+
+            foreach (var userRole in userRoles)
+            {
+                roleClaims.Add(new Claim(ClaimTypes.Role, userRole));
+                var currentRole = await _roleManager.FindByNameAsync(userRole);
+                var allPermissionsForCurrentRole = await _roleManager.GetClaimsAsync(currentRole!);
+                permissionClaims.AddRange(allPermissionsForCurrentRole);
+            }
+
             var claims = new List<Claim>
             {
                 new (ClaimTypes.NameIdentifier, user.Id),
@@ -94,7 +111,8 @@ namespace Infrastructure.Identity.Tokens
                 new (ClaimTypes.Surname, user.LastName),
                 new (ClaimTypes.MobilePhone, user.PhoneNumber??string.Empty),
                 new Claim(ClaimConstants.Tenant, _tenantContextAccessor.MultiTenantContext.TenantInfo!.Id!)
-            };
+            }.Union(roleClaims).Union(userClaims).Union(permissionClaims);
+             
             return claims;
         }
         private string GenerateEncryptedToken(SigningCredentials signingCredentials, IEnumerable<Claim> claims)
