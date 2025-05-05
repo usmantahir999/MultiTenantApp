@@ -7,8 +7,8 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.GetJwtSettings(builder.Configuration);
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddJwtAuthentication(builder.Services.GetJwtSettings(builder.Configuration));
 
 var app = builder.Build();
 await app.Services.AddDatabaseInitializerAsync();
