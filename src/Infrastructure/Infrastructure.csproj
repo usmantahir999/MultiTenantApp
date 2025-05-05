@@ -18,7 +18,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="NSwag.Core" Version="14.4.0" />
+	  <PackageReference Include="NSwag.AspNetCore" Version="14.2.0" />
   </ItemGroup>
 
   <ItemGroup>
