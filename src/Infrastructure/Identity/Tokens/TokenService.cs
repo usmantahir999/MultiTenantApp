@@ -10,7 +10,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Identity.Tokens
 {
@@ -54,11 +53,41 @@ namespace Infrastructure.Identity.Tokens
             return await GenerateTokenAndUpdateUserAsync(userInDb);
         }
 
-        public Task<TokenResponse> RefreshTokenAsync(RefreshTokenRequest request)
+        public async Task<TokenResponse> RefreshTokenAsync(RefreshTokenRequest request)
         {
-            throw new NotImplementedException();
+            var userPrincipal = GetClaimsPrincipalFromExpiryToken(request.CurrentJwt);
+            var userEmail = userPrincipal.GetEmail();
+            var userInDb = await _userManager.FindByEmailAsync(userEmail) ?? throw new UnAuthorizedException(["Authentication failed."]);
+            if(userInDb.RefreshToken != request.CurrentRefreshToken || userInDb.RefreshTokenExpiryTime<DateTime.UtcNow)
+            {
+                throw new UnAuthorizedException(["Invalid token."]);
+            }
+            return await GenerateTokenAndUpdateUserAsync(userInDb);
         }
 
+        private ClaimsPrincipal GetClaimsPrincipalFromExpiryToken(string expiryToken)
+        {
+            var tkValidationParams = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ClockSkew = TimeSpan.Zero,
+                RoleClaimType = ClaimTypes.Role,
+                ValidateLifetime = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("YourSecretKeyHere")),
+
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var principal= tokenHandler.ValidateToken(expiryToken, tkValidationParams, out SecurityToken securityToken);
+            if(securityToken is not JwtSecurityToken jwtToken || jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new UnAuthorizedException(["Invalid token provided. Failed to generate new token."]);
+            }
+            return principal;
+
+        }
         private async Task<TokenResponse> GenerateTokenAndUpdateUserAsync(ApplicationUser user)
         {
             //Generate Jwt
