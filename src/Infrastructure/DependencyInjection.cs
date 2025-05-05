@@ -1,7 +1,10 @@
-﻿using Finbuckle.MultiTenant;
+﻿using Application;
+using Application.Features.Identity.Tokens;
+using Finbuckle.MultiTenant;
 using Infrastructure.Contexts;
 using Infrastructure.Identity.Auth;
 using Infrastructure.Identity.Models;
+using Infrastructure.Identity.Tokens;
 using Infrastructure.Tenancy;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -44,7 +47,8 @@ namespace Infrastructure
                     options.User.RequireUniqueEmail = true;
                 }).AddEntityFrameworkStores<ApplicationDbContext>()
                   .AddDefaultTokenProviders()
-                  .Services;
+                  .Services
+                  .AddScoped<ITokenService, TokenService>();
         }
 
         internal static IServiceCollection AddPermissions(this IServiceCollection services)
@@ -53,6 +57,12 @@ namespace Infrastructure
                 .AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
         }
 
+        public static JwtSettings GetJwtSettings(this IServiceCollection services, IConfiguration configuration)
+        {
+            var jwtSettingsConfig  = configuration.GetSection(nameof(JwtSettings));
+            services.Configure<JwtSettings>(jwtSettingsConfig);
+            return jwtSettingsConfig.Get<JwtSettings>()!;
+        }
         public static async Task AddDatabaseInitializerAsync(this IServiceProvider services, CancellationToken cancellationToken = default)
         {
             using var scope = services.CreateScope();
