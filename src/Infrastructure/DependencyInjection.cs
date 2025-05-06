@@ -7,6 +7,7 @@ using Infrastructure.Contexts;
 using Infrastructure.Identity.Auth;
 using Infrastructure.Identity.Models;
 using Infrastructure.Identity.Tokens;
+using Infrastructure.OpenApi;
 using Infrastructure.Tenancy;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -18,6 +19,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using NSwag;
+using NSwag.Generation.Processors.Security;
 using System.Net;
 using System.Reflection;
 using System.Security.Claims;
@@ -42,7 +45,8 @@ namespace Infrastructure
               }).AddTransient<ITenantDbSeeder, TenantDbSeeder>()
                 .AddTransient<ApplicationDbSeeder>()
                 .AddIdentityService()
-                .AddPermissions();
+                .AddPermissions()
+                .AddOpenApiDocumentation(configuration);
         }
         internal static IServiceCollection AddIdentityService(this IServiceCollection services)
         {
@@ -167,9 +171,63 @@ namespace Infrastructure
             return services;
         }
 
+        internal static IServiceCollection AddOpenApiDocumentation(this IServiceCollection services, IConfiguration configuration)
+        {
+            var swaggerSettings = configuration.GetSection(nameof(SwaggerSettings)).Get<SwaggerSettings>();
+            services.AddEndpointsApiExplorer();
+            _ = services.AddOpenApiDocument((document, serviceProvider) =>
+            {
+                document.PostProcess = doc =>
+                {
+                    doc.Info.Title = swaggerSettings.Title;
+                    doc.Info.Description = swaggerSettings.Description;
+                    doc.Info.Contact = new OpenApiContact
+                    {
+                        Name = swaggerSettings.ContactName,
+                        Email = swaggerSettings.ContactEmail,
+                        Url = swaggerSettings.ContactUrl
+                    };
+                    doc.Info.License = new OpenApiLicense
+                    {
+                        Name = swaggerSettings.LicenseName,
+                        Url = swaggerSettings.LicenseUrl
+                    };
+                };
+                document.AddSecurity(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Description = "Enter your bearer token to attach it as a header on your requests.",
+                    In = OpenApiSecurityApiKeyLocation.Header,
+                    Type = OpenApiSecuritySchemeType.Http,
+                    Scheme = JwtBearerDefaults.AuthenticationScheme,
+                    BearerFormat= "JWT"
+                });
+                document.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor());
+                document.OperationProcessors.Add(new SwaggerGlobalAuthProcessor());
+                document.OperationProcessors.Add(new SwaggerHeaderAttributeProcessor());
+            });
+            return services;
+        }
+
         public static IApplicationBuilder UseInfrastructure(this IApplicationBuilder app)
         {
-            return app.UseMultiTenant();
+            return app
+                .UseAuthentication()
+                .UseMultiTenant()
+                .UseAuthorization()
+                .UseOpenApiDocumentation();
+        }
+
+        internal static IApplicationBuilder UseOpenApiDocumentation(this IApplicationBuilder app)
+        {
+            app.UseOpenApi();
+            app.UseSwaggerUi(options =>
+            {
+                options.DefaultModelExpandDepth = -1;
+                options.DocExpansion = "none";
+                options.TagsSorter = "alpha";
+            });
+            return app;
         }
     }
 }
