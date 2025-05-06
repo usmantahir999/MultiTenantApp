@@ -13,7 +13,6 @@
   <ItemGroup>
     <Folder Include="Features\Identity\Roles\Commands\" />
     <Folder Include="Features\Identity\Roles\Queries\" />
-    <Folder Include="Features\Identity\Tokens\Queries\" />
     <Folder Include="Features\Identity\Users\Commands\" />
     <Folder Include="Features\Identity\Users\Queries\" />
     <Folder Include="Features\Schools\" />
