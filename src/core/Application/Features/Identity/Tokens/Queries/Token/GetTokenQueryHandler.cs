@@ -1,7 +1,7 @@
 ﻿using Application.Wrappers;
 using MediatR;
 
-namespace Application.Features.Identity.Tokens.Queries
+namespace Application.Features.Identity.Tokens.Queries.Token
 {
     public class GetTokenQueryHandler : IRequestHandler<GetTokenQuery, IResponseWrapper>
     {
