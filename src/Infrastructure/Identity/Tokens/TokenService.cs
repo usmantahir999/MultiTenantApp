@@ -155,7 +155,16 @@ namespace Infrastructure.Identity.Tokens
                 signingCredentials: signingCredentials
             );
             var tokenHandler = new JwtSecurityTokenHandler();
-            return tokenHandler.WriteToken(token);
+            try
+            {
+                return tokenHandler.WriteToken(token);
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+           // return tokenHandler.WriteToken(token);
         }
 
         private string GenerateRefreshToken()

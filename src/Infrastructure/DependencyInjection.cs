@@ -38,6 +38,7 @@ namespace Infrastructure
             }).AddMultiTenant<SchoolTenantInfo>()
               .WithHeaderStrategy(TenancyConstants.TenantIdName)
               .WithClaimStrategy(TenancyConstants.TenantIdName)
+              .WithEFCoreStore<TenantDbContext, SchoolTenantInfo>()
               .Services
               .AddDbContext<ApplicationDbContext>(options =>
               {
