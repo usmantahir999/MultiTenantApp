@@ -2,14 +2,14 @@
 
 namespace Application.Exceptions
 {
-    public class UnAuthorizedException : Exception
+    public class UnauthorizedException : Exception
     {
-        public List<string> Errors { get; set; } = null!;
+        public List<string> ErrorMessages { get; set; } = null!;
         public HttpStatusCode StatusCode { get; set; }
-        public UnAuthorizedException(List<string> errorMessages = default!, HttpStatusCode statusCode = HttpStatusCode.Unauthorized)
+        public UnauthorizedException(List<string> errorMessages = default!, HttpStatusCode statusCode = HttpStatusCode.Unauthorized)
         {
             StatusCode = statusCode;
-            Errors = errorMessages;
+            ErrorMessages = errorMessages;
         }
     }
 }

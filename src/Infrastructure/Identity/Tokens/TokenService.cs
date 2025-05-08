@@ -33,22 +33,22 @@ namespace Infrastructure.Identity.Tokens
             #region Validations
             if (!_tenantContextAccessor.MultiTenantContext.TenantInfo?.IsActive ?? false)
             {
-                throw new UnAuthorizedException(["Tenant is not active. Contact Administrator."]);
+                throw new UnauthorizedException(["Tenant is not active. Contact Administrator."]);
             }
-            var userInDb = await _userManager.FindByNameAsync(request.Username) ?? throw new UnAuthorizedException(["Authentication is not successful."]);
+            var userInDb = await _userManager.FindByNameAsync(request.Username) ?? throw new UnauthorizedException(["Authentication is not successful."]);
             if (!await _userManager.CheckPasswordAsync(userInDb, request.Password))
             {
-                throw new UnAuthorizedException(["Incorrect Username or password."]);
+                throw new UnauthorizedException(["Incorrect Username or password."]);
             }
             if (!userInDb.IsActive)
             {
-                throw new UnAuthorizedException(["User is not active. Contact Administrator."]);
+                throw new UnauthorizedException(["User is not active. Contact Administrator."]);
             }
             if (_tenantContextAccessor.MultiTenantContext.TenantInfo!.Id is not TenancyConstants.Root.Id)
             {
                 if (_tenantContextAccessor.MultiTenantContext.TenantInfo.ValidUpto < DateTime.UtcNow)
                 {
-                    throw new UnAuthorizedException(["Tenant Subscription has expired. Contact Administrator."]);
+                    throw new UnauthorizedException(["Tenant Subscription has expired. Contact Administrator."]);
                 }
             }
             #endregion
@@ -60,10 +60,10 @@ namespace Infrastructure.Identity.Tokens
         {
             var userPrincipal = GetClaimsPrincipalFromExpiryToken(request.CurrentJwt);
             var userEmail = userPrincipal.GetEmail();
-            var userInDb = await _userManager.FindByEmailAsync(userEmail) ?? throw new UnAuthorizedException(["Authentication failed."]);
+            var userInDb = await _userManager.FindByEmailAsync(userEmail) ?? throw new UnauthorizedException(["Authentication failed."]);
             if(userInDb.RefreshToken != request.CurrentRefreshToken || userInDb.RefreshTokenExpiryTime<DateTime.UtcNow)
             {
-                throw new UnAuthorizedException(["Invalid token."]);
+                throw new UnauthorizedException(["Invalid token."]);
             }
             return await GenerateTokenAndUpdateUserAsync(userInDb);
         }
@@ -86,7 +86,7 @@ namespace Infrastructure.Identity.Tokens
             var principal= tokenHandler.ValidateToken(expiryToken, tkValidationParams, out SecurityToken securityToken);
             if(securityToken is not JwtSecurityToken jwtToken || jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.OrdinalIgnoreCase))
             {
-                throw new UnAuthorizedException(["Invalid token provided. Failed to generate new token."]);
+                throw new UnauthorizedException(["Invalid token provided. Failed to generate new token."]);
             }
             return principal;
 
