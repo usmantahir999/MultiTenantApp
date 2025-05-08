@@ -1,5 +1,6 @@
 using Infrastructure;
 using Application;
+using WebApi;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -15,6 +16,7 @@ await app.Services.AddDatabaseInitializerAsync();
 
 app.UseHttpsRedirection();
 app.UseInfrastructure();
+app.UseMiddleware<ErrorHandlingMiddleware>();
 app.MapControllers();
 
 app.Run();
