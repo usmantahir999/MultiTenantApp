@@ -16,7 +16,6 @@
     <Folder Include="Features\Identity\Users\Commands\" />
     <Folder Include="Features\Identity\Users\Queries\" />
     <Folder Include="Features\Schools\" />
-    <Folder Include="Features\Tenancy\" />
     <Folder Include="Pipelines\" />
   </ItemGroup>
 
