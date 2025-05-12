@@ -1,43 +1,86 @@
 ﻿using Application.Features.Tenancy;
 using Application.Features.Tenancy.Commands;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Finbuckle.MultiTenant;
+using Finbuckle.MultiTenant.Abstractions;
+using Infrastructure.Contexts;
+using Mapster;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Tenancy
 {
-    internal class TenantService : ITenantService
+    public class TenantService : ITenantService
     {
-        public Task<string> ActivateAsync(string id)
+        private readonly IMultiTenantStore<SchoolTenantInfo> _tenantStore;
+        private readonly IServiceProvider _serviceProvider;
+        public TenantService(IMultiTenantStore<SchoolTenantInfo> tenantStore, IServiceProvider serviceProvider)
         {
-            throw new NotImplementedException();
+            _tenantStore = tenantStore;
+            _serviceProvider = serviceProvider;
         }
 
-        public Task<string> CreateTenantAsync(CreateTenantRequest createTenant, CancellationToken ct)
+        public async Task<string> ActivateAsync(string id)
         {
-            throw new NotImplementedException();
+            var tenantInDb = await _tenantStore.TryGetAsync(id);
+            tenantInDb.IsActive = true;
+            await _tenantStore.TryUpdateAsync(tenantInDb);
+            return tenantInDb.Identifier;
         }
 
-        public Task<string> DeactivateAsync(string id)
+        public async Task<string> CreateTenantAsync(CreateTenantRequest createTenant, CancellationToken ct)
         {
-            throw new NotImplementedException();
+            var newTenant = new SchoolTenantInfo
+            {
+                Id = createTenant.Identifier,
+                Identifier = createTenant.Identifier,
+                Name = createTenant.Name,
+                IsActive = createTenant.IsActive,
+                ConnectionString = createTenant.ConnectionString,
+                Email = createTenant.Email,
+                FirstName = createTenant.FirstName,
+                LastName = createTenant.LastName,
+                ValidUpto = createTenant.ValidUpTo
+            };
+            await _tenantStore.TryAddAsync(newTenant);
+            using var scope = _serviceProvider.CreateScope();
+            _serviceProvider.GetRequiredService<IMultiTenantContextSetter>()
+                .MultiTenantContext = new MultiTenantContext<SchoolTenantInfo>()
+                {
+                    TenantInfo = newTenant
+                };
+            await scope.ServiceProvider.GetRequiredService<ApplicationDbSeeder>()
+                .InitializeDatabaseAsync(ct);
+            return newTenant.Identifier;
         }
 
-        public Task<TenantResponse> GetTenantByIdAsync(string id)
+        public async Task<string> DeactivateAsync(string id)
         {
-            throw new NotImplementedException();
+            var tenantInDb = await _tenantStore.TryGetAsync(id);
+            tenantInDb.IsActive = false;
+
+            await _tenantStore.TryUpdateAsync(tenantInDb);
+            return tenantInDb.Identifier;
         }
 
-        public Task<List<TenantResponse>> GetTenantsAsync()
+        public async Task<TenantResponse> GetTenantByIdAsync(string id)
         {
-            throw new NotImplementedException();
+            var tenantInDb = await _tenantStore.TryGetAsync(id);
+            return tenantInDb.Adapt<TenantResponse>();
         }
 
-        public Task<string> UpdateSubscriptionAsync(UpdateTenantSubscriptionRequest updateTenantSubscription)
+        public async Task<List<TenantResponse>> GetTenantsAsync()
         {
-            throw new NotImplementedException();
+            var tenantsInDb = await _tenantStore.GetAllAsync();
+            return tenantsInDb.Adapt<List<TenantResponse>>();
+        }
+
+        public async Task<string> UpdateSubscriptionAsync(UpdateTenantSubscriptionRequest updateTenantSubscription)
+        {
+            var tenantInDb = await _tenantStore.TryGetAsync(updateTenantSubscription.TenantId);
+            tenantInDb.ValidUpto = updateTenantSubscription.NewExpiryDate;
+
+            await _tenantStore.TryUpdateAsync(tenantInDb);
+
+            return tenantInDb.Identifier;
         }
     }
 }
