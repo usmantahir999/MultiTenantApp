@@ -1,7 +1,6 @@
 ﻿using Domain.Entities;
 using Finbuckle.MultiTenant.Abstractions;
 using Microsoft.EntityFrameworkCore;
-using System.Data;
 
 namespace Infrastructure.Contexts
 {
@@ -12,6 +11,6 @@ namespace Infrastructure.Contexts
         {
 
         }
-        public DbSet<School> School => Set<School>();
+        public DbSet<School> Schools => Set<School>();
     }
 }
