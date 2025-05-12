@@ -33,23 +33,22 @@ namespace Infrastructure
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
-            return services.AddDbContext<TenantDbContext>(options =>
-            {
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
-            }).AddMultiTenant<SchoolTenantInfo>()
-              .WithHeaderStrategy(TenancyConstants.TenantIdName)
-              .WithClaimStrategy(TenancyConstants.TenantIdName)
-              .WithEFCoreStore<TenantDbContext, SchoolTenantInfo>()
-              .Services
-              .AddDbContext<ApplicationDbContext>(options =>
-              {
-                  options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
-              }).AddTransient<ITenantDbSeeder, TenantDbSeeder>()
-                .AddTransient<ApplicationDbSeeder>()
-                .AddTransient<ITenantService, TenantService>()
-                .AddIdentityService()
-                .AddPermissions()
-                .AddOpenApiDocumentation(configuration);
+            return services
+                .AddDbContext<TenantDbContext>(options => options
+                    .UseSqlServer(configuration.GetConnectionString("DefaultConnection")))
+                .AddMultiTenant<SchoolTenantInfo>()
+                    .WithHeaderStrategy(TenancyConstants.TenantIdName)
+                    .WithClaimStrategy(TenancyConstants.TenantIdName)
+                    .WithEFCoreStore<TenantDbContext, SchoolTenantInfo>()
+                    .Services
+                 .AddDbContext<ApplicationDbContext>(options => options
+                    .UseSqlServer(configuration.GetConnectionString("DefaultConnection")))
+                 .AddTransient<ITenantDbSeeder, TenantDbSeeder>()
+                 .AddTransient<ApplicationDbSeeder>()
+                 .AddTransient<ITenantService, TenantService>()
+                 .AddIdentityService()
+                 .AddPermissions()
+                 .AddOpenApiDocumentation(configuration);
         }
         internal static IServiceCollection AddIdentityService(this IServiceCollection services)
         {
@@ -63,9 +62,9 @@ namespace Infrastructure
                     options.Password.RequireNonAlphanumeric = false;
                     options.User.RequireUniqueEmail = true;
                 }).AddEntityFrameworkStores<ApplicationDbContext>()
-                  .AddDefaultTokenProviders()
-                  .Services
-                  .AddScoped<ITokenService, TokenService>();
+                .AddDefaultTokenProviders()
+                .Services
+                .AddScoped<ITokenService, TokenService>();
         }
 
         internal static IServiceCollection AddPermissions(this IServiceCollection services)
@@ -80,10 +79,12 @@ namespace Infrastructure
             services.Configure<JwtSettings>(jwtSettingsConfig);
             return jwtSettingsConfig.Get<JwtSettings>()!;
         }
-        public static async Task AddDatabaseInitializerAsync(this IServiceProvider services, CancellationToken cancellationToken = default)
+        public static async Task AddDatabaseInitializerAsync(this IServiceProvider serviceProvider, CancellationToken ct = default)
         {
-            using var scope = services.CreateScope();
-            await scope.ServiceProvider.GetRequiredService<ITenantDbSeeder>().InitializeDatabaseAsync(cancellationToken);
+            using var scope = serviceProvider.CreateScope();
+
+            await scope.ServiceProvider.GetRequiredService<ITenantDbSeeder>()
+                .InitializeDatabaseAsync(ct);
         }
 
         public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, JwtSettings jwtSettings)
