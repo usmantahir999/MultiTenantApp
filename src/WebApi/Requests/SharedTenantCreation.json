@@ -1,0 +1,10 @@
+{
+  "identifier": "tenanta",
+  "name": "tenant A",
+  "connectionString": null,
+  "email": "dao.user@test.com",
+  "firstName": "first",
+  "lastName": "dao",
+  "validUpTo": "2026-05-12T06:18:40.741Z",
+  "isActive": true
+}

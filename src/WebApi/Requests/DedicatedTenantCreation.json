@@ -1,0 +1,10 @@
+{
+  "identifier": "tenantb",
+  "name": "tenant B",
+  "connectionString": "Data Source=.; Initial Catalog=SchoolTenantBDb; Integrated Security=True;TrustServerCertificate=True; MultipleActiveResultSets=True",
+  "email": "njm.user@test.com",
+  "firstName": "first",
+  "lastName": "njm",
+  "validUpTo": "2026-05-12T06:18:40.741Z",
+  "isActive": true
+}
