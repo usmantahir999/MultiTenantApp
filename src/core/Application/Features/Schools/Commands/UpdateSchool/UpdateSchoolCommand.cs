@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Application.Wrappers;
+using MediatR;
 
 namespace Application.Features.Schools.Commands.UpdateSchool
 {
-    internal class UpdateSchoolCommand
+    public class UpdateSchoolCommand : IRequest<IResponseWrapper>
     {
+        public UpdateSchoolRequest UpdateSchool { get; set; }
     }
 }

@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Application.Wrappers;
+using MediatR;
 
 namespace Application.Features.Schools.Commands.CreateSchool
 {
-    internal class CreateSchoolCommand
+    public class CreateSchoolCommand : IRequest<IResponseWrapper>
     {
+        public CreateSchoolRequest CreateSchool { get; set; }
     }
 }
