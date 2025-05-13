@@ -15,7 +15,6 @@
     <Folder Include="Features\Identity\Roles\Queries\" />
     <Folder Include="Features\Identity\Users\Commands\" />
     <Folder Include="Features\Identity\Users\Queries\" />
-    <Folder Include="Pipelines\" />
   </ItemGroup>
 
   <ItemGroup>
