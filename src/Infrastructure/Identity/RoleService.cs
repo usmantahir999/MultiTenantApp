@@ -127,9 +127,46 @@ namespace Infrastructure.Identity
             return roleInDb.Name;
         }
 
-        public Task<string> UpdatePermissionsAsync(UpdateRolePermissionsRequest request)
+        public async Task<string> UpdatePermissionsAsync(UpdateRolePermissionsRequest request)
         {
-            throw new NotImplementedException();
+            var roleInDb = await _roleManager.FindByIdAsync(request.RoleId)
+                ?? throw new NotFoundException(["Role does not exist."]);
+            if (roleInDb.Name == RoleConstants.Admin)
+            {
+                throw new ConflictException([$"Not allowed to change permissions for '{roleInDb.Name}' role."]);
+            }
+
+            if (_tenantInfoContextAccessor.MultiTenantContext.TenantInfo.Id != TenancyConstants.Root.Id)
+            {
+                request.NewPermissions.RemoveAll(p => p.StartsWith("Permission.Tenants."));
+            }
+            var currentClaims = await _roleManager.GetClaimsAsync(roleInDb);
+
+            foreach (var claim in currentClaims.Where(c => !request.NewPermissions.Any(p => p == c.Value)))
+            {
+                var result = await _roleManager.RemoveClaimAsync(roleInDb, claim);
+
+                if (!result.Succeeded)
+                {
+                    throw new IdentityException(IdentityHelper.GetIdentityResultErrorDescriptions(result));
+                }
+            }
+            foreach (var newPermission in request.NewPermissions.Where(p => !currentClaims.Any(c => c.Value == p)))
+            {
+                await _context
+                    .RoleClaims
+                    .AddAsync(new ApplicationRoleClaim
+                    {
+                        RoleId = roleInDb.Id,
+                        ClaimType = ClaimConstants.Permission,
+                        ClaimValue = newPermission,
+                        Description = "",
+                        Group = ""
+                    });
+            }
+            await _context.SaveChangesAsync();
+
+            return "Permissions Updated Successfully.";
         }
     }
 }
