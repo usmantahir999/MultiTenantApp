@@ -52,15 +52,6 @@ namespace Infrastructure.Tenancy
         private async Task InitializeApplicationDbForTenantAsync(SchoolTenantInfo currentTenant, CancellationToken ct)
         {
             using var scope = _serviceProvider.CreateScope();
-
-            //_serviceProvider.GetRequiredService<IMultiTenantContextSetter>()
-            //    .MultiTenantContext = new MultiTenantContext<SchoolTenantInfo>()
-            //    {
-            //        TenantInfo = currentTenant,
-            //    };
-
-            //await scope.ServiceProvider.GetRequiredService<ApplicationDbSeeder>()
-            //    .InitializeDatabaseAsync(ct);
             var contextSetter = scope.ServiceProvider.GetRequiredService<IMultiTenantContextSetter>();
             contextSetter.MultiTenantContext = new MultiTenantContext<SchoolTenantInfo>
             {
