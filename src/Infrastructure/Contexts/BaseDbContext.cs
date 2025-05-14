@@ -40,6 +40,10 @@ namespace Infrastructure.Contexts
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            //if (!string.IsNullOrWhiteSpace(TenantInfo?.SchemaName))
+            //{
+            //    modelBuilder.HasDefaultSchema(TenantInfo.SchemaName);
+            //}
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);
 
