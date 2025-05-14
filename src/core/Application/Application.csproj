@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <Folder Include="Features\Identity\Users\Commands\" />
-    <Folder Include="Features\Identity\Users\Queries\" />
   </ItemGroup>
 
   <ItemGroup>
