@@ -162,14 +162,49 @@ namespace Infrastructure.Identity
             return userInDb.Adapt<UserResponse>();
         }
 
-        public Task<List<string>> GetUserPermissionsAsync(string userId, CancellationToken ct)
+        public async Task<List<string>> GetUserPermissionsAsync(string userId, CancellationToken ct)
         {
-            throw new NotImplementedException();
+            var userInDb = await GetUserAsync(userId);
+
+            var userRolesNames = await _userManager.GetRolesAsync(userInDb);
+
+            var permissions = new List<string>();
+
+            foreach (var role in await _roleManager
+                .Roles
+                .Where(r => userRolesNames.Contains(r.Name))
+                .ToListAsync(ct))
+            {
+                permissions.AddRange(await _context
+                    .RoleClaims
+                    .Where(rc => rc.RoleId == role.Id && rc.ClaimType == ClaimConstants.Permission)
+                    .Select(rc => rc.ClaimValue)
+                    .ToListAsync(ct));
+            }
+
+            return permissions.Distinct().ToList();
         }
 
-        public Task<List<UserRoleResponse>> GetUserRolesAsync(string userId, CancellationToken ct)
+        public async Task<List<UserRoleResponse>> GetUserRolesAsync(string userId, CancellationToken ct)
         {
-            throw new NotImplementedException();
+            var userInDb = await GetUserAsync(userId);
+
+            var userRoles = new List<UserRoleResponse>();
+
+            var rolesInDb = await _roleManager.Roles.ToListAsync(ct);
+
+            foreach (var role in rolesInDb)
+            {
+                userRoles.Add(new UserRoleResponse
+                {
+                    RoleId = role.Id,
+                    Name = role.Name,
+                    Description = role.Description,
+                    IsAssigned = await _userManager.IsInRoleAsync(userInDb, role.Name),
+                });
+            }
+
+            return userRoles;
         }
 
         public async Task<bool> IsEmailTakenAsync(string email)
@@ -177,9 +212,9 @@ namespace Infrastructure.Identity
             return await _userManager.FindByEmailAsync(email) is not null;
         }
 
-        public Task<bool> IsPermissionAssigedAsync(string userId, string permission, CancellationToken ct = default)
+        public async Task<bool> IsPermissionAssigedAsync(string userId, string permission, CancellationToken ct = default)
         {
-            throw new NotImplementedException();
+            return (await GetUserPermissionsAsync(userId, ct)).Contains(permission);
         }
 
         public async Task<string> UpdateAsync(UpdateUserRequest request)
