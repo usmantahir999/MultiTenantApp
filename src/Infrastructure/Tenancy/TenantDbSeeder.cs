@@ -28,6 +28,7 @@ namespace Infrastructure.Tenancy
 
         private async Task InitializeDatabaseWithTenantAsync(CancellationToken ct)
         {
+            await _tenantDbContext.Database.MigrateAsync(ct);
             if (await _tenantDbContext.TenantInfo.FindAsync([TenancyConstants.Root.Id], ct) is null)
             {
                 // Create tenant

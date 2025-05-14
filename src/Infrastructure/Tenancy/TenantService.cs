@@ -42,13 +42,14 @@ namespace Infrastructure.Tenancy
             };
             await _tenantStore.TryAddAsync(newTenant);
             using var scope = _serviceProvider.CreateScope();
-            _serviceProvider.GetRequiredService<IMultiTenantContextSetter>()
-                .MultiTenantContext = new MultiTenantContext<SchoolTenantInfo>()
-                {
-                    TenantInfo = newTenant
-                };
-            await scope.ServiceProvider.GetRequiredService<ApplicationDbSeeder>()
-                .InitializeDatabaseAsync(ct);
+            var contextSetter = scope.ServiceProvider.GetRequiredService<IMultiTenantContextSetter>();
+            contextSetter.MultiTenantContext = new MultiTenantContext<SchoolTenantInfo>
+            {
+                TenantInfo = newTenant
+            };
+
+            var seeder = scope.ServiceProvider.GetRequiredService<ApplicationDbSeeder>();
+            await seeder.InitializeDatabaseAsync(ct);
             return newTenant.Identifier;
         }
 

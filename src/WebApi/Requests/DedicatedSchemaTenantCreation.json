@@ -1,0 +1,10 @@
+{
+  "identifier": "tenants",
+  "name": "tenant s",
+  "email": "sjm.user@test.com",
+  "schemaName":  "tenantschema",
+  "firstName": "dedicated schema",
+  "lastName": "sjm",
+  "validUpTo": "2026-05-12T06:18:40.741Z",
+  "isActive": true
+}
