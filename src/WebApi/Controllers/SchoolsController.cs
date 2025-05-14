@@ -7,7 +7,6 @@ using Application.Features.Schools.Queries.GetSchools;
 using Application.Features.Schools;
 using Infrastructure.Constants;
 using Infrastructure.Identity.Auth;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers

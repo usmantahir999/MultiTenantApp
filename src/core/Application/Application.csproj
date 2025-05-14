@@ -11,7 +11,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\Identity\Roles\Commands\" />
+    <Folder Include="Features\Identity\Roles\Commands\DeleteRole\" />
+    <Folder Include="Features\Identity\Roles\Commands\UpdateRolePermissions\" />
+    <Folder Include="Features\Identity\Roles\Commands\UpdateRole\" />
     <Folder Include="Features\Identity\Roles\Queries\" />
     <Folder Include="Features\Identity\Users\Commands\" />
     <Folder Include="Features\Identity\Users\Queries\" />

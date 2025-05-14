@@ -4,7 +4,7 @@ namespace Infrastructure.Identity.Models
 {
     public class ApplicationRoleClaim:IdentityRoleClaim<string>
     {
-        public string Description { get; set; } = string.Empty;
-        public string Group { get; set; } = string.Empty;
+        public string Description { get; set; } 
+        public string Group { get; set; } 
     }
 }
