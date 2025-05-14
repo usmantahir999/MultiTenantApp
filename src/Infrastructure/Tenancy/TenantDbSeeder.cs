@@ -60,6 +60,14 @@ namespace Infrastructure.Tenancy
 
             await scope.ServiceProvider.GetRequiredService<ApplicationDbSeeder>()
                 .InitializeDatabaseAsync(ct);
+            //var contextSetter = scope.ServiceProvider.GetRequiredService<IMultiTenantContextSetter>();
+            //contextSetter.MultiTenantContext = new MultiTenantContext<SchoolTenantInfo>
+            //{
+            //    TenantInfo = currentTenant
+            //};
+
+            //var seeder = scope.ServiceProvider.GetRequiredService<ApplicationDbSeeder>();
+            //await seeder.InitializeDatabaseAsync(ct);
         }
 
     }

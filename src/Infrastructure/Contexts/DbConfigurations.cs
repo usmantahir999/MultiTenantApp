@@ -13,55 +13,73 @@ namespace Infrastructure.Contexts
         {
             public void Configure(EntityTypeBuilder<ApplicationUser> builder)
             {
-                builder.ToTable("Users","Identity").IsMultiTenant();
+                builder
+                    .ToTable("Users", "Identity")
+                    .IsMultiTenant();
             }
         }
+
         internal class ApplicationRoleConfig : IEntityTypeConfiguration<ApplicationRole>
         {
             public void Configure(EntityTypeBuilder<ApplicationRole> builder)
             {
-                builder.ToTable("Roles", "Identity").IsMultiTenant();
+                builder
+                    .ToTable("Roles", "Identity")
+                    .IsMultiTenant();
             }
         }
-
         internal class ApplicationRoleClaimConfig : IEntityTypeConfiguration<ApplicationRoleClaim>
         {
-            public void Configure(EntityTypeBuilder<ApplicationRoleClaim> builder)
-            {
-                builder.ToTable("RoleClaims", "Identity").IsMultiTenant();
-            }
+            public void Configure(EntityTypeBuilder<ApplicationRoleClaim> builder) =>
+                builder
+                    .ToTable("RoleClaims", "Identity")
+                    .IsMultiTenant();
         }
 
         internal class IdentityUserRoleConfig : IEntityTypeConfiguration<IdentityUserRole<string>>
         {
-            public void Configure(EntityTypeBuilder<IdentityUserRole<string>> builder)
-            {
-                builder.ToTable("UserRoles", "Identity").IsMultiTenant();
-            }
+            public void Configure(EntityTypeBuilder<IdentityUserRole<string>> builder) =>
+                builder
+                    .ToTable("UserRoles", "Identity")
+                    .IsMultiTenant();
         }
 
-        internal class IdentityUserClaimsConfig : IEntityTypeConfiguration<IdentityUserClaim<string>>
+        internal class IdentityUserClaimConfig : IEntityTypeConfiguration<IdentityUserClaim<string>>
         {
-            public void Configure(EntityTypeBuilder<IdentityUserClaim<string>> builder)
-            {
-                builder.ToTable("UserClaims", "Identity").IsMultiTenant();
-            }
+            public void Configure(EntityTypeBuilder<IdentityUserClaim<string>> builder) =>
+                builder
+                    .ToTable("UserClaims", "Identity")
+                    .IsMultiTenant();
         }
 
         internal class IdentityUserLoginConfig : IEntityTypeConfiguration<IdentityUserLogin<string>>
         {
-            public void Configure(EntityTypeBuilder<IdentityUserLogin<string>> builder)
-            {
-                builder.ToTable("UserLogins", "Identity").IsMultiTenant();
-            }
+            public void Configure(EntityTypeBuilder<IdentityUserLogin<string>> builder) =>
+                builder
+                    .ToTable("UserLogins", "Identity")
+                    .IsMultiTenant();
+        }
+
+        internal class IdentityUserTokenConfig : IEntityTypeConfiguration<IdentityUserToken<string>>
+        {
+            public void Configure(EntityTypeBuilder<IdentityUserToken<string>> builder) =>
+                builder
+                    .ToTable("UserTokens", "Identity")
+                    .IsMultiTenant();
         }
 
         internal class SchoolConfig : IEntityTypeConfiguration<School>
         {
             public void Configure(EntityTypeBuilder<School> builder)
             {
-                builder.ToTable("Schools", "Academics").IsMultiTenant();
-                builder.Property(x => x.Name).IsRequired().HasMaxLength(60);
+                builder
+                    .ToTable("Schools", "Academics")
+                    .IsMultiTenant();
+
+                builder
+                    .Property(school => school.Name)
+                    .IsRequired()
+                    .HasMaxLength(60);
             }
         }
     }
