@@ -52,22 +52,22 @@ namespace Infrastructure.Tenancy
         {
             using var scope = _serviceProvider.CreateScope();
 
-            _serviceProvider.GetRequiredService<IMultiTenantContextSetter>()
-                .MultiTenantContext = new MultiTenantContext<SchoolTenantInfo>()
-                {
-                    TenantInfo = currentTenant,
-                };
+            //_serviceProvider.GetRequiredService<IMultiTenantContextSetter>()
+            //    .MultiTenantContext = new MultiTenantContext<SchoolTenantInfo>()
+            //    {
+            //        TenantInfo = currentTenant,
+            //    };
 
-            await scope.ServiceProvider.GetRequiredService<ApplicationDbSeeder>()
-                .InitializeDatabaseAsync(ct);
-            //var contextSetter = scope.ServiceProvider.GetRequiredService<IMultiTenantContextSetter>();
-            //contextSetter.MultiTenantContext = new MultiTenantContext<SchoolTenantInfo>
-            //{
-            //    TenantInfo = currentTenant
-            //};
+            //await scope.ServiceProvider.GetRequiredService<ApplicationDbSeeder>()
+            //    .InitializeDatabaseAsync(ct);
+            var contextSetter = scope.ServiceProvider.GetRequiredService<IMultiTenantContextSetter>();
+            contextSetter.MultiTenantContext = new MultiTenantContext<SchoolTenantInfo>
+            {
+                TenantInfo = currentTenant
+            };
 
-            //var seeder = scope.ServiceProvider.GetRequiredService<ApplicationDbSeeder>();
-            //await seeder.InitializeDatabaseAsync(ct);
+            var seeder = scope.ServiceProvider.GetRequiredService<ApplicationDbSeeder>();
+            await seeder.InitializeDatabaseAsync(ct);
         }
 
     }
