@@ -3,7 +3,7 @@ using MediatR;
 
 namespace Application.Features.Identity.Users.Commands.UpdateUser
 {
-    public class UpdateUserCommandHanlder(IUserService userService) : IRequestHandler<UpdateUserCommand, IResponseWrapper>
+    public class UpdateUserCommandHandler(IUserService userService) : IRequestHandler<UpdateUserCommand, IResponseWrapper>
     {
         private readonly IUserService _userService = userService;
 

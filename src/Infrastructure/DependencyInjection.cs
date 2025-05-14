@@ -1,6 +1,7 @@
 ﻿using Application;
 using Application.Features.Identity.Roles;
 using Application.Features.Identity.Tokens;
+using Application.Features.Identity.Users;
 using Application.Features.Schools;
 using Application.Features.Tenancy.Commands;
 using Application.Wrappers;
@@ -70,7 +71,10 @@ namespace Infrastructure
                 .AddDefaultTokenProviders()
                 .Services
                 .AddScoped<ITokenService, TokenService>()
-                .AddScoped<IRoleService, RoleService>();
+                .AddScoped<IRoleService, RoleService>()
+                .AddScoped<IUserService, UserService>()
+                .AddScoped<ICurrentUserService, CurrentUserService>()
+                .AddScoped<CurrentUserMiddleware>();
         }
 
         internal static IServiceCollection AddPermissions(this IServiceCollection services)
@@ -223,6 +227,7 @@ namespace Infrastructure
         {
             return app
                 .UseAuthentication()
+                .UseMiddleware<CurrentUserMiddleware>()
                 .UseMultiTenant()
                 .UseAuthorization()
                 .UseOpenApiDocumentation();
