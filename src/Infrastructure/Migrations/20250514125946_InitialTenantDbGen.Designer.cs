@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(TenantDbContext))]
-    [Migration("20250424064646_InitialTenantDbGeneration")]
-    partial class InitialTenantDbGeneration
+    [Migration("20250514125946_InitialTenantDbGen")]
+    partial class InitialTenantDbGen
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,15 +32,12 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(64)");
 
                     b.Property<string>("ConnectionString")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FirstName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Identifier")
@@ -50,7 +47,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("LastName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
