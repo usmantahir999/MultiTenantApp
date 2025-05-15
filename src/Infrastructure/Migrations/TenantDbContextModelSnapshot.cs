@@ -49,9 +49,6 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("SchemaName")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("ValidUpto")
                         .HasColumnType("datetime2");
 

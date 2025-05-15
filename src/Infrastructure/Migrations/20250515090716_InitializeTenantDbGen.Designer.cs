@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(TenantDbContext))]
-    [Migration("20250515065333_InitializeTenantDbGen")]
+    [Migration("20250515090716_InitializeTenantDbGen")]
     partial class InitializeTenantDbGen
     {
         /// <inheritdoc />
@@ -52,9 +52,6 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("SchemaName")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("ValidUpto")
                         .HasColumnType("datetime2");
 
@@ -64,7 +61,7 @@ namespace Infrastructure.Migrations
                         .IsUnique()
                         .HasFilter("[Identifier] IS NOT NULL");
 
-                    b.ToTable("Tenants", (string)null);
+                    b.ToTable("Tenants", "Multitenancy");
                 });
 #pragma warning restore 612, 618
         }
