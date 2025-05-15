@@ -35,7 +35,7 @@ namespace Infrastructure.Tenancy
                 Name = createTenant.Name,
                 IsActive = createTenant.IsActive,
                 ConnectionString = createTenant.ConnectionString,
-                SchemaName = createTenant.ConnectionString,
+                SchemaName = createTenant.SchemaName,
                 Email = createTenant.Email,
                 FirstName = createTenant.FirstName,
                 LastName = createTenant.LastName,

@@ -10,7 +10,7 @@ namespace Infrastructure.Tenancy
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<SchoolTenantInfo>(b =>
             {
-                b.ToTable("Tenants","Multitenancy");
+                b.ToTable("Tenants");
             });
         }
     }

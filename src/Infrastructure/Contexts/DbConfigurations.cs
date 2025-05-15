@@ -14,7 +14,7 @@ namespace Infrastructure.Contexts
             public void Configure(EntityTypeBuilder<ApplicationUser> builder)
             {
                 builder
-                    .ToTable("Users", "Identity")
+                    .ToTable("Users")
                     .IsMultiTenant();
             }
         }
@@ -24,7 +24,7 @@ namespace Infrastructure.Contexts
             public void Configure(EntityTypeBuilder<ApplicationRole> builder)
             {
                 builder
-                    .ToTable("Roles", "Identity")
+                    .ToTable("Roles")
                     .IsMultiTenant();
             }
         }
@@ -32,7 +32,7 @@ namespace Infrastructure.Contexts
         {
             public void Configure(EntityTypeBuilder<ApplicationRoleClaim> builder) =>
                 builder
-                    .ToTable("RoleClaims", "Identity")
+                    .ToTable("RoleClaims")
                     .IsMultiTenant();
         }
 
@@ -40,7 +40,7 @@ namespace Infrastructure.Contexts
         {
             public void Configure(EntityTypeBuilder<IdentityUserRole<string>> builder) =>
                 builder
-                    .ToTable("UserRoles", "Identity")
+                    .ToTable("UserRoles")
                     .IsMultiTenant();
         }
 
@@ -48,7 +48,7 @@ namespace Infrastructure.Contexts
         {
             public void Configure(EntityTypeBuilder<IdentityUserClaim<string>> builder) =>
                 builder
-                    .ToTable("UserClaims", "Identity")
+                    .ToTable("UserClaims")
                     .IsMultiTenant();
         }
 
@@ -56,7 +56,7 @@ namespace Infrastructure.Contexts
         {
             public void Configure(EntityTypeBuilder<IdentityUserLogin<string>> builder) =>
                 builder
-                    .ToTable("UserLogins", "Identity")
+                    .ToTable("UserLogins")
                     .IsMultiTenant();
         }
 
@@ -64,7 +64,7 @@ namespace Infrastructure.Contexts
         {
             public void Configure(EntityTypeBuilder<IdentityUserToken<string>> builder) =>
                 builder
-                    .ToTable("UserTokens", "Identity")
+                    .ToTable("UserTokens")
                     .IsMultiTenant();
         }
 
@@ -73,7 +73,7 @@ namespace Infrastructure.Contexts
             public void Configure(EntityTypeBuilder<School> builder)
             {
                 builder
-                    .ToTable("Schools", "Academics")
+                    .ToTable("Schools")
                     .IsMultiTenant();
 
                 builder

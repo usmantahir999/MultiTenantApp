@@ -61,7 +61,7 @@ namespace Infrastructure.Migrations
                         .IsUnique()
                         .HasFilter("[Identifier] IS NOT NULL");
 
-                    b.ToTable("Tenants", "Multitenancy");
+                    b.ToTable("Tenants", (string)null);
                 });
 #pragma warning restore 612, 618
         }

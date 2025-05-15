@@ -4,6 +4,7 @@ using Infrastructure.Identity.Models;
 using Infrastructure.Tenancy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Infrastructure.Contexts
 {
@@ -24,6 +25,18 @@ namespace Infrastructure.Contexts
 
         public async Task InitializeDatabaseAsync(CancellationToken cancellationToken)
         {
+            if (!string.IsNullOrEmpty(_tenantInfoContextAccessor.MultiTenantContext.TenantInfo.SchemaName))
+            {
+                var schema = _tenantInfoContextAccessor.MultiTenantContext.TenantInfo.SchemaName;
+                // Ensure that the schema exists
+                var createSchemaSql = $@"
+            IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = '{_tenantInfoContextAccessor.MultiTenantContext.TenantInfo.SchemaName}')
+            EXEC('CREATE SCHEMA [{_tenantInfoContextAccessor.MultiTenantContext.TenantInfo.SchemaName}]')";
+                await _applicationdDbContext.Database.ExecuteSqlRawAsync(createSchemaSql, cancellationToken);
+
+                
+            }
+
             if (_applicationdDbContext.Database.GetMigrations().Any())
             {
                 if((await _applicationdDbContext.Database.GetPendingMigrationsAsync(cancellationToken)).Any())

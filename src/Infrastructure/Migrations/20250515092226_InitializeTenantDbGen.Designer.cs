@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(TenantDbContext))]
-    [Migration("20250515091346_UpdateTenantDbGen")]
-    partial class UpdateTenantDbGen
+    [Migration("20250515092226_InitializeTenantDbGen")]
+    partial class InitializeTenantDbGen
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -64,7 +64,7 @@ namespace Infrastructure.Migrations
                         .IsUnique()
                         .HasFilter("[Identifier] IS NOT NULL");
 
-                    b.ToTable("Tenants", "Multitenancy");
+                    b.ToTable("Tenants", (string)null);
                 });
 #pragma warning restore 612, 618
         }
